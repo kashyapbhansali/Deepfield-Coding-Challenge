@@ -3,16 +3,59 @@
 	<title>Google Books Search Engine</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
 <style>
+
+body {
+	font-family: "Century Gothic";
+}
+
+.book_info {
+	display: flex;
+	display: -webkit-flex;
+	background: #f9f9f9;
+	height: 120px;
+	margin: 20px;
+	width: 70%;
+	vertical-align: top;
+	padding: 10px;
+}
+
+.thumbnail {
+	display: inline-block;
+
+}
+
+.thumbnail img {
+	height: 100%;
+	width: 100%;
+
+}
+
+.title {
+	display: inline-block;
+	height: 100%;
+	width: 100%;
+	margin-left: 10px;
+	vertical-align: text-top;
+}
+
+.title h3 {
+	margin: 0;
+}
+
+.book_link {
+	font-size: 12px;
+}
+
 </style>
 <body>
 
 <div id="searchArea">
-	<input id="searchBar" placeholder="Input search term here" value="dan brown" />
+	<input id="searchBar" placeholder="Input search term here" />
 	<button id="searchBtn" type="submit" onclick="getDetails()">Search</button>
 </div>
 <div id="resultsArea">
-	<ul id="results">
-	</ul>
+	<div id="results">
+	</div>
 </div>
 <script type="text/javascript">
 /**
@@ -48,9 +91,6 @@
  * 7) You should save your final product as googleBooks_codeTest_<your last name>.html
  */
 
-
-
-
 var itemSet = new Set();
 var itemList = [];
 
@@ -82,13 +122,14 @@ function searchForBooks(term, callback) {
 
     		for (var i = 0; i < response.items.length; i++) {
 		        // set the item from the response object
+		        var no_thumbnail = "http://aurangabadcity.com/img/client_images/image_not_available.jpg";
 		        var item = response.items[i];
 		        var itemData = {};
 		        itemData.id = item.id;
 		        itemData.title = item.volumeInfo.title;
-		        itemData.subtitle = item.volumeInfo.subtitle;
+		        itemData.subtitle = item.volumeInfo.subtitle? " - " +item.volumeInfo.subtitle: "" ;
 		        itemData.authors = item.volumeInfo.authors;
-		        itemData.thumbnail = item.volumeInfo.imageLinks.thumbnail;
+		        itemData.thumbnail = item.volumeInfo.imageLinks?item.volumeInfo.imageLinks.thumbnail : no_thumbnail ;
 		        itemData.rating = item.volumeInfo.averageRating;
 		        itemData.infoLink = item.volumeInfo.infoLink;
 		        itemData.previewLink = item.volumeInfo.previewLink;
@@ -99,6 +140,8 @@ function searchForBooks(term, callback) {
 		        	itemList.push(itemData); 
 		        	itemSet.add(itemData.id);
 		        }
+
+
 		        	            
 	      	}
 
@@ -117,12 +160,20 @@ function searchForBooks(term, callback) {
  */
 function render() {
 	// TODO
-	$("#resultsArea").append( function() {
+	$("#results").append( function() {
 		var output = "";
 		itemList.forEach( function(book) {
 
 		// Set the book title in the div
-		output += "<li>" + book.title +"  " +book.id +"</li>";
+		output += "<div class='book_info'>";
+		output += "<div class='thumbnail'><img src='" +book.thumbnail +"'></div>";
+		output += "<div class='title'>";
+		output += "<h3>" + book.title +book.subtitle +"</h3>";
+		output += "<span>Rating: " +book.rating +"| Categories: " +book.categories+"</span><br>";
+		output += "<span>Author: " +book.authors +"</span><br>";
+		output += "<a class='book_link' target='_blank' href='" +book.infoLink +"'>Go to Book's Page </a> | ";
+		output += "<a class='book_link' target='_blank' href='" +book.previewLink +"'>Book preview</a>";
+		output += "</div></div>";
 		});
 
 		return output;
@@ -133,7 +184,7 @@ function render() {
 
 
 /**
- * Driver method that execute the searchForbooks and render methods
+ * Driver method to execute the searchForbooks and render methods
  * @param - none
  */
 function getDetails() {
