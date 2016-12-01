@@ -1,0 +1,148 @@
+<html>
+<head>
+	<title>Google Books Search Engine</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+<style>
+</style>
+<body>
+
+<div id="searchArea">
+	<input id="searchBar" placeholder="Input search term here" value="dan brown" />
+	<button id="searchBtn" type="submit" onclick="getDetails()">Search</button>
+</div>
+<div id="resultsArea">
+	<ul id="results">
+	</ul>
+</div>
+<script type="text/javascript">
+/**
+ * 0) Remove the div with id="instructions".  You will be modifying this file. <done>
+ *
+ * 1) Research the Google Books Volume API to determine
+ *    how to search for books given a query.
+ *	  https://developers.google.com/books/docs/v1/reference/volumes
+ *
+ * 2) You may use jQuery.
+ *
+ * 3) Given the following HTML, you are tasked with building a basic search engine
+ *    for Google Books.  There should be a search bar to input a query that will be
+ *	  be passed as an argument to the Google Books API.  The results should be rendered
+ *	  in the results area.  You must include at least (if available for the record):
+ *		+ Cover image
+ *		+ Title
+ *		+ Subtitle
+ *		+ Authors
+ *
+ *	  Additionally, each results should somehow provide a link to item's Google Books page.
+ *    hint: Look at a Google Books entry on Google Books, and see which parameter might help you.
+ *
+ * 4) Results should be styled logically, however, this isn't a design position, so don't feel
+ *	  like you have to impress us, although it should be presentable.
+ *
+ * 5) Each subsequent query should append its results to the results area.
+ *    There must be no duplicates (by Google Books id).
+ *
+ * 6) Note: While you must use the three function stubs provided below,
+ *    This will require you to write some code outside of them.
+ *
+ * 7) You should save your final product as googleBooks_codeTest_<your last name>.html
+ */
+
+
+
+
+var itemSet = new Set();
+var itemList = [];
+
+/**
+ * Renders an error message
+ * @param msg {string} - error message to render
+ */
+function showError(msg) {
+	var html = '<li><p class="error">' + msg + '</p></li>';
+	$("#resultsArea").html(html);
+}
+
+/**
+ * Searches for books and returns a JSON list
+ * @param term {string} - search term
+ * @param callback {function} - do something with results
+ */
+function searchForBooks(term, callback) {
+	// TODO  
+	var callAPI = "https://www.googleapis.com/books/v1/volumes?q=" +term;
+	
+	$.ajax({
+        type: 'get',
+        url: callAPI,
+        data: {
+            
+        },
+        success: function (response) {
+
+    		for (var i = 0; i < response.items.length; i++) {
+		        // set the item from the response object
+		        var item = response.items[i];
+		        var itemData = {};
+		        itemData.id = item.id;
+		        itemData.title = item.volumeInfo.title;
+		        itemData.subtitle = item.volumeInfo.subtitle;
+		        itemData.authors = item.volumeInfo.authors;
+		        itemData.thumbnail = item.volumeInfo.imageLinks.thumbnail;
+		        itemData.rating = item.volumeInfo.averageRating;
+		        itemData.infoLink = item.volumeInfo.infoLink;
+		        itemData.previewLink = item.volumeInfo.previewLink;
+		        itemData.categories = item.volumeInfo.categories;
+		        //console.log(itemData);
+		         
+		        if (!itemSet.has(itemData.id)) {
+		        	itemList.push(itemData); 
+		        	itemSet.add(itemData.id);
+		        }
+		        	            
+	      	}
+
+	      	render();
+        
+        },
+        error: function (response) {
+        	showError("Error:" +response.status +"  Message: " +response.responseText);
+        }
+   });
+}
+
+/**
+ * Render loadedBooks contents
+ * Generates HTML and sets #results's contents to it
+ */
+function render() {
+	// TODO
+	$("#resultsArea").append( function() {
+		var output = "";
+		itemList.forEach( function(book) {
+
+		// Set the book title in the div
+		output += "<li>" + book.title +"  " +book.id +"</li>";
+		});
+
+		return output;
+	});
+
+	itemList = [];
+}
+
+
+/**
+ * Driver method that execute the searchForbooks and render methods
+ * @param - none
+ */
+function getDetails() {
+	
+	var query = document.getElementById("searchBar").value;
+	searchForBooks(query);
+}
+
+
+</script>
+</body>
+</html>
