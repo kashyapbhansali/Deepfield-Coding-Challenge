@@ -5,7 +5,7 @@
 <style>
 
 body {
-	font-family: "Century Gothic";
+	font-family: "Helvetica"; 
 }
 
 .book_info {
@@ -50,8 +50,10 @@ body {
 <body>
 
 <div id="searchArea">
-	<input id="searchBar" placeholder="Input search term here" />
+	<input id="searchBar" placeholder="Input search term here" required />
 	<button id="searchBtn" type="submit" onclick="getDetails()">Search</button>
+	<br>
+	<p>Number of Results: <span id="result_count">0</span></p>
 </div>
 <div id="resultsArea">
 	<div id="results">
@@ -61,37 +63,40 @@ body {
 /**
  * 0) Remove the div with id="instructions".  You will be modifying this file. <done>
  *
- * 1) Research the Google Books Volume API to determine
+ * 1) Research the Google Books Volume API to determine	<done>
  *    how to search for books given a query.
  *	  https://developers.google.com/books/docs/v1/reference/volumes
  *
- * 2) You may use jQuery.
+ * 2) You may use jQuery. <done>
  *
- * 3) Given the following HTML, you are tasked with building a basic search engine
+ * 3) Given the following HTML, you are tasked with building a basic search engine <done>
  *    for Google Books.  There should be a search bar to input a query that will be
  *	  be passed as an argument to the Google Books API.  The results should be rendered
- *	  in the results area.  You must include at least (if available for the record):
- *		+ Cover image
+ *	  in the results area.  You must include at least (if available for the record):  <done>
+ *		+ Cover image 
  *		+ Title
  *		+ Subtitle
  *		+ Authors
  *
- *	  Additionally, each results should somehow provide a link to item's Google Books page.
+ *	  Additionally, each results should somehow provide a link to item's Google Books page. <done>
  *    hint: Look at a Google Books entry on Google Books, and see which parameter might help you.
  *
  * 4) Results should be styled logically, however, this isn't a design position, so don't feel
  *	  like you have to impress us, although it should be presentable.
  *
- * 5) Each subsequent query should append its results to the results area.
- *    There must be no duplicates (by Google Books id).
+ * 5) Each subsequent query should append its results to the results area. <done>
+ *    There must be no duplicates (by Google Books id). <done>
  *
  * 6) Note: While you must use the three function stubs provided below,
  *    This will require you to write some code outside of them.
  *
- * 7) You should save your final product as googleBooks_codeTest_<your last name>.html
+ * 7) You should save your final product as googleBooks_codeTest_<your last name>.html <done>
  */
 
+// Set to hold unique book ids
 var itemSet = new Set();
+
+// List used to store all the book to be rendered
 var itemList = [];
 
 /**
@@ -100,7 +105,7 @@ var itemList = [];
  */
 function showError(msg) {
 	var html = '<li><p class="error">' + msg + '</p></li>';
-	$("#resultsArea").html(html);
+	$("#resultsArea").append(html);
 }
 
 /**
@@ -110,6 +115,7 @@ function showError(msg) {
  */
 function searchForBooks(term, callback) {
 	// TODO  
+	// api call url
 	var callAPI = "https://www.googleapis.com/books/v1/volumes?q=" +term;
 	
 	$.ajax({
@@ -120,10 +126,15 @@ function searchForBooks(term, callback) {
         },
         success: function (response) {
 
+        	//clearing other errors on success of any query
+        	$('.error').parent().remove();
+
     		for (var i = 0; i < response.items.length; i++) {
-		        // set the item from the response object
+		        // image link if no image found for book
 		        var no_thumbnail = "http://aurangabadcity.com/img/client_images/image_not_available.jpg";
 		        var item = response.items[i];
+
+		        // New object that hold the useful data
 		        var itemData = {};
 		        itemData.id = item.id;
 		        itemData.title = item.volumeInfo.title;
@@ -134,22 +145,21 @@ function searchForBooks(term, callback) {
 		        itemData.infoLink = item.volumeInfo.infoLink;
 		        itemData.previewLink = item.volumeInfo.previewLink;
 		        itemData.categories = item.volumeInfo.categories;
-		        //console.log(itemData);
-		         
+
+		        // if SEt doesn't contain a certain book , Add it to itemSet and itemList
+		        // This way order is also maintained with uniqueness of id		         
 		        if (!itemSet.has(itemData.id)) {
 		        	itemList.push(itemData); 
 		        	itemSet.add(itemData.id);
-		        }
-
-
-		        	            
+		        }        	            
 	      	}
-
+	      	// call to render after data is processed
 	      	render();
         
         },
         error: function (response) {
-        	showError("Error:" +response.status +"  Message: " +response.responseText);
+        	var error_msg = "Error:" +response.status +"  Message: " +response.responseText;
+        	showError(error_msg);
         }
    });
 }
@@ -163,23 +173,25 @@ function render() {
 	$("#results").append( function() {
 		var output = "";
 		itemList.forEach( function(book) {
-
-		// Set the book title in the div
-		output += "<div class='book_info'>";
-		output += "<div class='thumbnail'><img src='" +book.thumbnail +"'></div>";
-		output += "<div class='title'>";
-		output += "<h3>" + book.title +book.subtitle +"</h3>";
-		output += "<span>Rating: " +book.rating +"| Categories: " +book.categories+"</span><br>";
-		output += "<span>Author: " +book.authors +"</span><br>";
-		output += "<a class='book_link' target='_blank' href='" +book.infoLink +"'>Go to Book's Page </a> | ";
-		output += "<a class='book_link' target='_blank' href='" +book.previewLink +"'>Book preview</a>";
-		output += "</div></div>";
+			// Set the book title in the div
+			output += "<div class='book_info'>";
+			output += "<div class='thumbnail'><img src='" +book.thumbnail +"'></div>";
+			output += "<div class='title'>";
+			output += "<h3>" + book.title +book.subtitle +"</h3>";
+			output += "<span>Rating: " +book.rating +"| Categories: " +book.categories+"</span><br>";
+			output += "<span>Author: " +book.authors +"</span><br>";
+			output += "<a class='book_link' target='_blank' href='" +book.infoLink +"'>Go to Book's Page </a> | ";
+			output += "<a class='book_link' target='_blank' href='" +book.previewLink +"'>Book preview</a>";
+			output += "</div></div>";
 		});
 
 		return output;
 	});
 
 	itemList = [];
+
+	var result_count = $('.book_info').length;
+	$('#result_count').html(result_count);
 }
 
 
@@ -188,7 +200,6 @@ function render() {
  * @param - none
  */
 function getDetails() {
-	
 	var query = document.getElementById("searchBar").value;
 	searchForBooks(query);
 }
