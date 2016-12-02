@@ -31,13 +31,54 @@ import urllib2
 # Get beautifulsoup4 with: pip install beautifulsoup4
 import bs4
 
+
+
+result = {}
+
 # To help get you started, here is a function to fetch and parse a page.
 # Given url, return soup.
-def url_to_soup(url):
+def urls_from_main(url):
     # bgp.he.net filters based on user-agent.
     req = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0' })
     html = urllib2.urlopen(req).read()
-    soup = bs4.BeautifulSoup(html)
-    return soup
+    soup = bs4.BeautifulSoup(html,"html.parser")
+    links = soup.select('td a')
+    data_from_report(links)
+
+def data_from_report(urls):
+	for url in urls:
+		link = url['href']
+		country = link[link.rfind('/')+1:]
+		generate_output(link,country)
+
+def generate_output(url,country):
+	baseurl = "http://bgp.he.net/" + url
+	req = urllib2.Request(baseurl, headers={ 'User-Agent': 'Mozilla/5.0' })
+	html = urllib2.urlopen(req).read()
+	soup = bs4.BeautifulSoup(html,"html.parser")
+
+	rows = soup.find_all("tr")
+
+	for row in rows:
+		datalist = row.find_all("td")
+		count = 1
+		for d in datalist:
+			if count == 1:
+				asn_num = d.find("a").string
+				print asn_num
+				count += 1
+			
 
 
+
+
+
+	
+
+
+			
+
+
+
+
+urls_from_main("http://bgp.he.net/report/world")
