@@ -35,8 +35,7 @@ import json
 
 result = {}
 
-# To help get you started, here is a function to fetch and parse a page.
-# Given url, return soup.
+
 def urls_from_main(url):
     # bgp.he.net filters based on user-agent.
     req = urllib2.Request(url, headers={ 'User-Agent': 'Mozilla/5.0' })
